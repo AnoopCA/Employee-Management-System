@@ -14,14 +14,15 @@ CREATE TABLE Employee(
 		Emergency_Contact VARCHAR(15),
 		Joining_Date DATE,
 		Manager_ID VARCHAR(50),
+        Password VARCHAR(255),
         primary key(Emp_ID)
 );
 INSERT INTO employee VALUES 
-	('E001', 'Anitha', 'HR', 'HRANL', 9123456789, 'anitha@testco.com', '123, ABC Street, Cochin', '1985-07-15', 'Female', 9876543210, '2010-02-15', 'M001'),
-	('E002', 'Ravi', 'IT', 'DEV', 7890123456, 'ravi@testco.com', '456, XYZ Avenue, Bangalore', '1990-11-20', 'Male', 8765432109, '2012-06-30', 'M002'),
-	('E003', 'Lakshmi', 'FIN', 'ACCT', 7012345678, 'lakshmi@testco.com', '789, DEF Road, Chennai', '1992-01-10', 'Female', 7654321098, '2018-04-10', 'M003'),
-    ('E004', 'Rajesh', 'HR', 'HRANL', 7012345679, 'rajesh@testco.com', '123, ABC Street, Bangalore', '1990-05-15', 'Male', 7654321099, '2017-06-12', 'M001'),
-	('E005', 'Sunita', 'IT', 'PM', 7012345680, 'sunita@testco.com', '456, XYZ Lane, Hyderabad', '1985-11-20', 'Female', 7654321100, '2019-08-25', 'M002');
+	('E001', 'Anitha', 'HR', 'HRANL', 9123456789, 'anitha@testco.com', '123, ABC Street, Cochin', '1985-07-15', 'Female', 9876543210, '2010-02-15', 'M001', 'E001PWD'),
+	('E002', 'Ravi', 'IT', 'DEV', 7890123456, 'ravi@testco.com', '456, XYZ Avenue, Bangalore', '1990-11-20', 'Male', 8765432109, '2012-06-30', 'M002', 'E002PWD'),
+	('E003', 'Lakshmi', 'FIN', 'ACCT', 7012345678, 'lakshmi@testco.com', '789, DEF Road, Chennai', '1992-01-10', 'Female', 7654321098, '2018-04-10', 'M003', 'E003PWD'),
+    ('E004', 'Rajesh', 'HR', 'HRANL', 7012345679, 'rajesh@testco.com', '123, ABC Street, Bangalore', '1990-05-15', 'Male', 7654321099, '2017-06-12', 'M001', 'E004PWD'),
+	('E005', 'Sunita', 'IT', 'PM', 7012345680, 'sunita@testco.com', '456, XYZ Lane, Hyderabad', '1985-11-20', 'Female', 7654321100, '2019-08-25', 'M002', 'E005PWD');
 SELECT * FROM employee;
 
 CREATE TABLE Department(
