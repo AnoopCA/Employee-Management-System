@@ -1,16 +1,12 @@
+import pandas as pd
 import streamlit as st
 from mysql.connector import connect
+from streamlit_option_menu import option_menu
 
-st.title("EMPLOYEE MANAGEMENT SYSTEM")
-
-if 'login' not in st.session_state:
-    st.session_state['login'] = False
-
-choice = st.sidebar.selectbox("Select Your Role", ("Please Select", "Employee", "HR", "HOD","Manager", "Project Manager"))
-
-if choice == "Employee":
+def login_screen():
     if not st.session_state['login']:
         uid = st.text_input("Enter User ID")
+        st.session_state['uid'] = uid
         pwd = st.text_input("Enter Password", type="password")
         btn = st.button("Login")
         if btn:
@@ -22,18 +18,65 @@ if choice == "Employee":
                     st.session_state['login'] = True
                     break
             if not st.session_state['login']:
-                st.write("Incorrect User ID or Password")
+                st.error("Incorrect ID or Password")
+                return False
     else:
-        st.write("Login Successful")
-        st.image("https://static.vecteezy.com/system/resources/previews/005/611/252/non_2x/human-resource-management-selects-a-new-manager-recruiting-the-concept-of-human-resource-management-employee-selection-cv-application-illustration-in-flat-design-free-vector.jpg")
-        st.video("https://www.youtube.com/watch?v=AnIk41p9QnA")
+        return True
 
-elif choice == "HR":
-    st.write("HR Operations console")
-elif choice == "HOD":
-    st.write("Placeholder for Department Functions Management")
-elif choice == "Manager":
-    st.write("Placeholder for the items Manager handles")
-elif choice == "Project Manager":
-    st.write("Placeholder for project management console")
+st.title("EMPLOYEE MANAGEMENT SYSTEM")
 
+if 'login' not in st.session_state:
+    st.session_state['login'] = False
+
+if not st.session_state['login']:
+    st.session_state['choice'] = st.sidebar.selectbox("Select Your Role", ("Employee", "HR", "Department Head", "Manager", "Project Manager"))
+else:
+    if not st.session_state['choice']:
+        st.session_state['choice'] = None
+
+mydb = connect(host="localhost", user="root", password="Anoop", database="ems")
+
+if st.session_state['choice'] == "Employee":
+    if login_screen():
+        with st.sidebar:
+            selected = option_menu("Employee", ["View attendance status", "Mark attendance", "Mark leave", "View individual leaves", "View performance details", "View projects"], menu_icon="cast")
+
+        if selected == "View attendance status":
+            st.markdown("##### Attendance Status: ")
+            attendance = pd.read_sql(f"SELECT * FROM attendance WHERE emp_id='{st.session_state['uid']}'", mydb)
+            st.dataframe(attendance)
+
+        if selected == "View projects":
+            projects = pd.read_sql("SELECT * FROM projects", mydb)
+            st.dataframe(projects)
+        
+elif st.session_state['choice'] == "HR":
+    if login_screen():
+        with st.sidebar:
+            selected = option_menu("Human Resource Management", ["View employee", "Add Employee", "Delete Employee", "Update details of the employee", "Add payroll for new employee", "Update payroll for employee", "Add payroll for the month", "Generate & update performance data"], menu_icon="cast")
+        st.write(selected)
+
+elif st.session_state['choice'] == "Department Head":
+    if login_screen():
+        with st.sidebar:
+            selected = option_menu("Department Head", ["Update role", "Change department", "Update manager", "Add roles"], menu_icon="cast")
+        st.write(selected)
+
+elif st.session_state['choice'] == "Manager":
+    if login_screen():
+        with st.sidebar:
+            selected = option_menu("Manager", ["View leaves", "View approval request"], menu_icon="cast")
+        st.write(selected)
+elif st.session_state['choice'] == "Project Manager":
+    if login_screen():
+        with st.sidebar:
+            selected = option_menu("Project Manager", ["Add project", "Update project details", "Add/update employee project"], menu_icon="cast")
+        st.write(selected)
+
+def logout():
+    st.session_state['login'] = False
+    st.sidebar.success("You have been logged out")
+
+st.sidebar.markdown("---")
+if st.sidebar.button("Logout"):
+    logout()
