@@ -2,11 +2,11 @@ import pandas as pd
 import streamlit as st
 from mysql.connector import connect
 from streamlit_option_menu import option_menu
+from datetime import datetime
 
 def login_screen():
     if not st.session_state['login']:
         uid = st.text_input("Enter User ID")
-        st.session_state['uid'] = uid
         pwd = st.text_input("Enter Password", type="password")
         btn = st.button("Login")
         if btn:
@@ -16,6 +16,8 @@ def login_screen():
             for user in c:
                 if user[0]==uid and user[12]==pwd:
                     st.session_state['login'] = True
+                    st.session_state['uid'] = user[0]
+                    st.session_state['uname'] = user[1]
                     break
             if not st.session_state['login']:
                 st.error("Incorrect ID or Password")
@@ -35,20 +37,44 @@ else:
         st.session_state['choice'] = None
 
 mydb = connect(host="localhost", user="root", password="Anoop", database="ems")
+cursor = mydb.cursor()
 
 if st.session_state['choice'] == "Employee":
     if login_screen():
         with st.sidebar:
-            selected = option_menu("Employee", ["View attendance status", "Mark attendance", "Mark leave", "View individual leaves", "View performance details", "View projects"], menu_icon="cast")
+            selected = option_menu("Employee", ["View Attendance Status", "Mark Attendance", "Apply Leave", "View Individual Leaves", "View Performance Details", "View Projects"], menu_icon="cast")
 
-        if selected == "View attendance status":
+        if selected == "View Attendance Status":
             st.markdown("##### Attendance Status: ")
-            attendance = pd.read_sql(f"SELECT * FROM attendance WHERE emp_id='{st.session_state['uid']}'", mydb)
-            st.dataframe(attendance)
-
-        if selected == "View projects":
-            projects = pd.read_sql("SELECT * FROM projects", mydb)
-            st.dataframe(projects)
+            att_data = pd.read_sql(f"SELECT * FROM attendance WHERE emp_id='{st.session_state['uid']}'", mydb)
+            st.dataframe(att_data)
+        elif selected == "Mark Attendance":
+            st.write("")
+            att_stat = pd.read_sql(f"SELECT * FROM attendance WHERE emp_id='{st.session_state['uid']}' and att_date='{datetime.date(datetime.today())}'", mydb)
+            if att_stat.empty:
+                cursor.execute("INSERT INTO attendance VALUES (%s, %s, 'Present')",(datetime.date(datetime.today()), st.session_state['uid']))
+                mydb.commit()
+                st.markdown(f"##### Attendance marked for {st.session_state['uname']} for the date {datetime.today().strftime('%d-%m-%Y')}")
+            else:
+                st.markdown(f"##### Attendance already marked for {st.session_state['uname']} for the date {datetime.today().strftime('%d-%m-%Y')}")
+        elif selected == "Apply Leave":
+            st.write("")
+            st.markdown("##### Apply Leave")
+            leave_start_date = st.date_input("Select the start date:")
+            leave_end_date = st.date_input("Select the end date:")
+            leave_reason = st.text_input("Enter the reason:")
+            manager_id = cursor.execute(f"SELECT manager_id FROM employee WHERE emp_id='{st.session_state['uid']}'")
+            
+            # **** check the above query and resolve the issue of "Unread result found" *** #
+            
+            cursor.execute("INSERT INTO leaves VALUES (%s,%s,%s,%s,%s,%s)",(leave_start_date, leave_end_date, st.session_state['uid'], manager_id, "Pending for approval", leave_reason))
+            mydb.commit()
+        elif selected == "View Projects":
+            projects = pd.read_sql(f"""SELECT E.Emp_ID, E.Emp_Name, P.Project_ID, P.Project_Name, P.Start_Date, P.End_Date, P.Dept_ID, P.Manager_ID, EP.Role_in_Project, EP.Hours_Spent 
+                                     FROM employee E JOIN employee_project EP ON E.emp_id = EP.emp_id JOIN projects P ON P.project_id = EP.project_id 
+                                     WHERE E.emp_id='{st.session_state['uid']}'""", mydb)
+            st.markdown(f"##### Projects Handled by {st.session_state['uname']}: ")
+            st.dataframe(projects, use_container_width=True)
         
 elif st.session_state['choice'] == "HR":
     if login_screen():
@@ -73,10 +99,8 @@ elif st.session_state['choice'] == "Project Manager":
             selected = option_menu("Project Manager", ["Add project", "Update project details", "Add/update employee project"], menu_icon="cast")
         st.write(selected)
 
-def logout():
-    st.session_state['login'] = False
-    st.sidebar.success("You have been logged out")
-
 st.sidebar.markdown("---")
 if st.sidebar.button("Logout"):
-    logout()
+    st.session_state['login'] = False
+    st.session_state['choice'] = None
+    st.sidebar.success("You have been logged out")

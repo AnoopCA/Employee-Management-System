@@ -63,16 +63,18 @@ INSERT INTO attendance VALUES ('2024-07-18', 'E001', 'Present'),
 SELECT * FROM attendance;
 
 CREATE TABLE Leaves(
-		Leave_Date DATE,
+		Leave_Start_Date DATE,
+        Leave_End_Date DATE,
 		Emp_ID VARCHAR(50),
 		Approver_ID VARCHAR(50),
-		Approval_Status VARCHAR(20)
+		Approval_Status VARCHAR(20),
+        Reason_For_leave VARCHAR(255)
 );
-INSERT INTO leaves VALUES ('2024-07-18', 'E001', 'M001', 'Approved'),
-						  ('2024-07-15', 'E002', 'M002', 'Rejected'),
-                          ('2024-07-13', 'E003', 'M003', 'Approved'),
-                          ('2024-07-28', 'E004', 'M001', 'Approved'),
-                          ('2024-07-30', 'E005', 'M002', 'Approved');
+INSERT INTO leaves VALUES ('2024-07-18', '2024-07-19', 'E001', 'M001', 'Approved', 'headache'),
+						  ('2024-07-15', '2024-07-18', 'E002', 'M002', 'Rejected', 'personal function'),
+                          ('2024-07-13', '2024-07-14', 'E003', 'M003', 'Approved', 'marriage'),
+                          ('2024-07-28', '2024-07-30', 'E004', 'M001', 'Approved', 'funeral'),
+                          ('2024-07-30', '2024-08-10', 'E005', 'M002', 'Approved', 'vacation');
 SELECT * FROM leaves;
 
 CREATE TABLE Payroll(
@@ -113,7 +115,8 @@ INSERT INTO projects VALUES ('PJ001', 'XML Integration', '2020-05-28', '2020-08-
 							('PJ002', 'Database Migration', '2021-01-15', '2021-06-10', 'IT', 'M002'),
 							('PJ003', 'Accounts Transfer', '2022-03-22', '2022-09-05', 'ACC', 'M003'),
 							('PJ004', 'Network Security', '2023-07-01', '2023-12-15', 'IT', 'M004'),
-							('PJ005', 'Booking Transition', '2024-02-10', '2024-07-20', 'OPS', 'M005');
+							('PJ005', 'Booking Transition', '2024-02-10', '2024-07-20', 'OPS', 'M005'),
+                            ('PJ008', 'Cloud Integration', '2024-06-10', '2024-12-20', 'IT', 'M004');
 SELECT * FROM projects;
 
 CREATE TABLE Employee_Project(
@@ -122,9 +125,12 @@ CREATE TABLE Employee_Project(
 		Role_in_Project VARCHAR(255),
 		Hours_Spent INT
 );
-INSERT INTO employee_project VALUES ('E005', 'PJ002', 'Database Admin', 250),
-									('E002', 'PJ003', 'Project Manager', 250),
-                                    ('E003', 'PJ004', 'Network Admin', 250),
+INSERT INTO employee_project VALUES ('E005', 'PJ002', 'Database Admin', 180),
+									('E002', 'PJ003', 'Project Manager', 68),
+                                    ('E003', 'PJ004', 'Network Admin', 340),
                                     ('E001', 'PJ005', 'Operation Manager', 250),
-                                    ('E005', 'PJ001', 'Lead Developer', 250);
+                                    ('E005', 'PJ001', 'Lead Developer', 125),
+                                    ('E001', 'PJ008', 'Cloud Specialt', 118);
 SELECT * FROM employee_project;
+
+SELECT E.Emp_ID, E.Emp_Name, P.Project_ID, P.Project_Name, P.Start_Date, P.End_Date, P.Dept_ID, P.Manager_ID, EP.Role_in_Project, EP.Hours_Spent FROM employee E JOIN employee_project EP ON E.emp_id = EP.emp_id JOIN projects P ON P.project_id = EP.project_id WHERE E.emp_id='E001';
