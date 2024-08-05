@@ -4,6 +4,7 @@ from mysql.connector import connect
 from streamlit_option_menu import option_menu
 from datetime import datetime
 import time
+import calendar
 
 mydb = connect(host="localhost", user="root", password="Anoop", database="ems")
 cursor = mydb.cursor()
@@ -99,9 +100,118 @@ if st.session_state['choice'] == "Employee":
 elif st.session_state['choice'] == "HR":
     if login_screen():
         with st.sidebar:
-            selected = option_menu("Human Resource Management", ["View Employee", "Add Employee", "Delete Employee", "Update details of the employee", "Add payroll for new employee", "Update payroll for employee", "Add payroll for the month", "Generate & update performance data"], menu_icon="cast")
-        st.write(selected)
+            selected = option_menu("Human Resource Management", ["View Employee", "Add Employee", "Delete Employee", "Update Employee Details", "Generate Monthly Payroll", "Generate & Update Performance Data"], menu_icon="cast")
         
+        if selected == "View Employee":
+            st.write("")
+            emp_id = st.text_input("Provide the Employee ID to get the details:")
+            if st.button("Get Employee Details"):
+                emp_data = pd.read_sql(f"SELECT * FROM employee WHERE emp_id='{emp_id}'", mydb)
+                emp_payroll = pd.read_sql(f"SELECT * FROM payroll WHERE emp_id='{emp_id}'", mydb)
+                if emp_data.empty or emp_payroll.empty:
+                    st.warning("No details found for the given Employee ID!")
+                else:
+                    emp_data.drop('Password', axis=1, inplace=True)
+                    st.markdown("##### Details for the requested employee:")
+                    st.dataframe(emp_data, use_container_width=True)
+                    st.markdown("##### Payroll details:")
+                    st.dataframe(emp_payroll, use_container_width=True)
+
+        elif selected == "Add Employee":
+            Emp_ID = st.text_input("Employee ID")
+            Emp_Name = st.text_input("Employee Name")
+            Dept_ID = st.text_input("Department ID")
+            Role_ID = st.text_input("Role ID")
+            Contact_No = st.text_input("Contact Number")
+            Email = st.text_input("Email ID")
+            Address = st.text_input("Address")
+            Date_of_Birth = st.date_input("Date of Birth")
+            Gender = st.selectbox("Gender", ["Male", "Female"])
+            Emergency_Contact = st.text_input("Emergency Contact Number")
+            Joining_Date = st.date_input("Joining Date")
+            Manager_ID = st.text_input("Manager ID")
+            Password = st.text_input("Password")
+            Month_Year = Joining_Date.strftime("%B %Y")
+            Salary = st.number_input("Salary")
+            Deductions = st.number_input("Deductions")
+            if st.button("Save The Data"):
+                if not Emp_ID or not Emp_Name or not Dept_ID or not Role_ID or not Contact_No or not Email or not Address or not Gender or not Emergency_Contact or not Manager_ID or not Password or not Month_Year or not Salary or not Deductions:
+                    st.warning("Please fill out all the fields.")
+                else:
+                    cursor.execute("INSERT INTO employee VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)", (Emp_ID, Emp_Name, Dept_ID, Role_ID, Contact_No, Email, Address, Date_of_Birth, Gender, Emergency_Contact, Joining_Date, Manager_ID, Password))
+                    mydb.commit()
+                    cursor.execute("INSERT INTO payroll VALUES (%s,%s,%s,%s)", (Emp_ID, Month_Year, Salary, Deductions))
+                    mydb.commit()
+
+        elif selected == "Delete Employee":
+            st.markdown("##### Delete Employee")
+            Emp_ID = st.text_input("Enter the Employee ID:")
+            if st.button("Delete Employee Data"):
+                cursor.execute("SELECT * FROM employee WHERE emp_id=%s",(Emp_ID,))
+                match_found = cursor.fetchone()
+                if match_found:
+                    cursor.execute("DELETE FROM employee WHERE emp_id=%s", (Emp_ID,))
+                    mydb.commit()
+                    st.success(f"Employee data deleted successfully for the ID {Emp_ID}")
+                else:
+                    st.error("Employee data not found for the given Employee ID!")
+
+        elif selected == "Update Employee Details":
+            Emp_ID = st.text_input("Enter the Employee ID to fetch the data:")
+            if st.button("Fetch the data"):
+                cursor.execute("SELECT * FROM employee WHERE emp_id=%s",(Emp_ID,))
+                emp_data = cursor.fetchone()
+                cursor.execute("SELECT * FROM payroll WHERE emp_id=%s",(Emp_ID,))
+                emp_payroll = cursor.fetchone()
+                if emp_data and emp_payroll:
+                    st.session_state['emp_data'] = emp_data
+                    st.session_state['emp_payroll'] = emp_payroll
+                else:
+                    st.error("Employee data not found for the given Employee ID!")
+            if 'emp_data' in st.session_state and 'emp_payroll' in st.session_state:
+                st.markdown("##### Update Employee Details")
+                Emp_ID = st.text_input("Employee ID", value=st.session_state['emp_data'][0])
+                Emp_Name = st.text_input("Employee Name", value=st.session_state['emp_data'][1])
+                Dept_ID = st.text_input("Department ID", value=st.session_state['emp_data'][2])
+                Role_ID = st.text_input("Role ID", value=st.session_state['emp_data'][3])
+                Contact_No = st.text_input("Contact Number", value=st.session_state['emp_data'][4])
+                Email = st.text_input("Email ID", value=st.session_state['emp_data'][5])
+                Address = st.text_input("Address", value=st.session_state['emp_data'][6])
+                Date_of_Birth = st.date_input("Date of Birth", value=st.session_state['emp_data'][7])
+                Gender = st.selectbox("Gender", ["Male", "Female"], index=0 if st.session_state['emp_data'][8]=="Male" else 1)
+                Emergency_Contact = st.text_input("Emergency Contact Number", value=st.session_state['emp_data'][9])
+                Joining_Date = st.date_input("Joining Date", value=st.session_state['emp_data'][10])
+                Manager_ID = st.text_input("Manager ID", value=st.session_state['emp_data'][11])
+                Password = st.session_state['emp_data'][12]
+                Month_Year = st.text_input("Month_Year", value=st.session_state['emp_payroll'][1])
+                Salary = st.number_input("Salary", value=st.session_state['emp_payroll'][2])
+                Deductions = st.number_input("Deductions", value=st.session_state['emp_payroll'][3])
+                if st.button("Save Changes"):
+                    cursor.execute("UPDATE employee SET Emp_ID=%s,Emp_Name=%s,Dept_ID=%s,Role_ID=%s,Contact_No=%s,Email=%s,Address=%s,Date_of_Birth=%s,Gender=%s,Emergency_Contact=%s,Joining_Date=%s,Manager_ID=%s,Password=%s WHERE emp_id=%s", (Emp_ID,Emp_Name,Dept_ID,Role_ID,Contact_No,Email,Address,Date_of_Birth,Gender,Emergency_Contact,Joining_Date,Manager_ID,Password,Emp_ID))
+                    mydb.commit()
+                    cursor.execute("UPDATE payroll SET Emp_ID=%s,Month_Year=%s,Salary=%s,Deductions=%s WHERE emp_id=%s", (Emp_ID,Month_Year,Salary,Deductions,Emp_ID))
+                    mydb.commit()
+                    st.success("Employee details updated successfully!")
+                    st.session_state.pop('emp_data', None)
+                    st.session_state.pop('emp_payroll', None)
+        
+        elif selected == "Generate Monthly Payroll":
+            st.markdown("##### Previous Payroll:")
+            prev_mnth_yr = calendar.month_name[datetime.now().month] + " " + str(datetime.now().year)
+            crnt_mnth_yr = calendar.month_name[datetime.now().month + 1] + " " + str(datetime.now().year)
+            payroll_prev = pd.read_sql(f"SELECT * FROM payroll WHERE month_year='{prev_mnth_yr}'", mydb)
+            st.dataframe(payroll_prev)
+            if st.button("Copy previous payroll and generate for current month"):
+                cursor.execute("""INSERT INTO payroll (Emp_ID, Month_Year, Salary, Deductions) 
+                  SELECT Emp_ID, %s, Salary, Deductions FROM payroll WHERE Month_Year = %s""", (crnt_mnth_yr, prev_mnth_yr))
+                mydb.commit()
+                payroll_crnt = pd.read_sql(f"SELECT * FROM payroll WHERE month_year='{crnt_mnth_yr}'", mydb)
+                st.dataframe(payroll_crnt)
+                st.success(f"Generated payroll for {crnt_mnth_yr} successfully. If any updates are required, please use 'Update Employee Details' option.")
+
+        elif selected == "Generate & Update Performance Data":
+            st.text_input("")
+
 elif st.session_state['choice'] == "Department Head":
     if login_screen():
         with st.sidebar:
@@ -119,10 +229,18 @@ elif st.session_state['choice'] == "Project Manager":
             selected = option_menu("Project Manager", ["Add project", "Update project details", "Add/update employee project"], menu_icon="cast")
         st.write(selected)
 
-st.sidebar.markdown("---")
-if st.sidebar.button("Logout"):
-    st.session_state['login'] = False
-    st.session_state['choice'] = None
+st.session_state['popup'] = False
+with st.sidebar:
+    st.markdown("<br>" * 4, unsafe_allow_html=True)
+    st.sidebar.markdown("---")
+    col1, col2, col3 = st.columns([1, 1, 1])
+    with col2:
+        if st.button("Logout"):
+            st.session_state['login'] = False
+            st.session_state['choice'] = None
+            st.session_state['popup'] = True
+
+if st.session_state['popup']:
     popup("You have been logged out!")
 
 mydb.close()
