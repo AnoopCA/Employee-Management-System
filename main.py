@@ -203,20 +203,73 @@ elif st.session_state['choice'] == "HR":
             st.dataframe(payroll_prev)
             if st.button("Copy previous payroll and generate for current month"):
                 cursor.execute("""INSERT INTO payroll (Emp_ID, Month_Year, Salary, Deductions) 
-                  SELECT Emp_ID, %s, Salary, Deductions FROM payroll WHERE Month_Year = %s""", (crnt_mnth_yr, prev_mnth_yr))
+                                  SELECT Emp_ID, %s, Salary, Deductions FROM payroll WHERE Month_Year = %s""", (crnt_mnth_yr, prev_mnth_yr))
                 mydb.commit()
                 payroll_crnt = pd.read_sql(f"SELECT * FROM payroll WHERE month_year='{crnt_mnth_yr}'", mydb)
                 st.dataframe(payroll_crnt)
                 st.success(f"Generated payroll for {crnt_mnth_yr} successfully. If any updates are required, please use 'Update Employee Details' option.")
 
         elif selected == "Generate & Update Performance Data":
-            st.text_input("")
+            st.write("")
+            crnt_mnth = datetime.now().month
+            crnt_yr = datetime.now().year
+            crnt_fin_yr = str(datetime.now().year) + "-" + str(datetime.now().year + 1)
+            if (crnt_mnth < 7) or (crnt_mnth > 9):
+                st.warning("The performance review period is July to June and you can generate the performance data only in that period.")
+                if st.button("View current performance data"):
+                    performance = pd.read_sql(f"SELECT * FROM performance WHERE financial_year='{crnt_fin_yr}'", mydb)
+                    st.dataframe(performance)
+            else:
+                perf_data = pd.read_sql(f"SELECT * FROM performance WHERE financial_year='{crnt_fin_yr}'", mydb)
+                if not perf_data.empty:
+                    st.markdown(f"##### Performance Data for the Financial Year {crnt_fin_yr}")
+                    st.dataframe(perf_data)
+                else:
+                    cursor.execute("""INSERT INTO performance (Financial_Year, Emp_ID, Number_Of_Projects, Score)
+                                    SELECT %s AS Financial_Year, EP.emp_id, COUNT(P.project_id) AS Number_Of_Projects, %s AS Score FROM employee_project EP 
+                                    JOIN projects P ON EP.project_id = P.project_id WHERE YEAR(P.start_date)=%s OR YEAR(P.end_date)=%s
+                                    GROUP BY EP.emp_id""", (crnt_fin_yr, 5, crnt_yr, crnt_yr))
+                    mydb.commit()
+                    crnt_perf_data = pd.read_sql(f"SELECT * FROM performance WHERE financial_year='{crnt_fin_yr}'", mydb)
+                    st.markdown(f"##### Performance Data has been generated for the Financial Year {crnt_fin_yr} with an average rating of 5 for all employees:")
+                    st.dataframe(crnt_perf_data)
+                st.markdown(f"##### Update the individual scores below")
+                Emp_ID = st.text_input("Emp_ID: ")
+                Score = st.text_input("Score: ")
+                if st.button("Update the Employee Performance Data"):
+                    cursor.execute("UPDATE performance SET Score=%s WHERE emp_id=%s AND financial_year=%s", (Score,Emp_ID,crnt_fin_yr))
+                    mydb.commit()
+                    st.success("Performance data updated successfully!")
 
 elif st.session_state['choice'] == "Department Head":
     if login_screen():
         with st.sidebar:
-            selected = option_menu("Department Head", ["Update role", "Change department", "Update manager", "Add roles"], menu_icon="cast")
-        st.write(selected)
+            selected = option_menu("Department Head", ["Update Role", "Change Department", "Update Manager", "Add Roles"], menu_icon="cast")
+        
+        if selected == "Update Role":
+            Role_ID = st.text_input("Enter the Role ID to update the details:")
+            if st.button("Fetch the Roles Data"):
+                if Role_ID != "":
+                    cursor.execute("SELECT * FROM roles where role_id=%s", (Role_ID,))
+                    role_update = cursor.fetchone()
+                    st.session_state['roles'] = role_update    
+                    if 'roles' in st.session_state:
+                        Role_Name = st.text_input("Role Name", value=st.session_state['roles'][1])
+                        Role_Desc = st.text_input("Role Description", value=st.session_state['roles'][2])
+                        st.write(st.session_state['roles'], "at 1")
+                        if st.button("Update the Data"):
+                            st.write(st.session_state['roles'], "at 2")
+                            cursor.execute("UPDATE role SET role_name=%s, role_desc=%s WHERE role_id=%s", (Role_Name,Role_Desc,Role_ID))
+                            mydb.commit()
+                            st.success("The role details updated successfully!")
+                            st.session_state.pop('roles', None)
+                    else:
+                        st.error("The given Role ID is not found!")
+                else:
+                    st.error("Please enter the Role ID!")
+    
+        #elif selected == "Change Department":
+
 
 elif st.session_state['choice'] == "Manager":
     if login_screen():

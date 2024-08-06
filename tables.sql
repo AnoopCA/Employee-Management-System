@@ -22,7 +22,8 @@ INSERT INTO employee VALUES
 	('E002', 'Ravi', 'IT', 'DEV', 7890123456, 'ravi@testco.com', '456, XYZ Avenue, Bangalore', '1990-11-20', 'Male', 8765432109, '2012-06-30', 'M002', 'E002PWD'),
 	('E003', 'Lakshmi', 'FIN', 'ACCT', 7012345678, 'lakshmi@testco.com', '789, DEF Road, Chennai', '1992-01-10', 'Female', 7654321098, '2018-04-10', 'M003', 'E003PWD'),
     ('E004', 'Rajesh', 'HR', 'HRANL', 7012345679, 'rajesh@testco.com', '123, ABC Street, Bangalore', '1990-05-15', 'Male', 7654321099, '2017-06-12', 'M001', 'E004PWD'),
-	('E005', 'Sunita', 'IT', 'PM', 7012345680, 'sunita@testco.com', '456, XYZ Lane, Hyderabad', '1985-11-20', 'Female', 7654321100, '2019-08-25', 'M002', 'E005PWD');
+	('E005', 'Sunita', 'IT', 'PM', 7012345680, 'sunita@testco.com', '456, XYZ Lane, Hyderabad', '1985-11-20', 'Female', 7654321100, '2019-08-25', 'M002', 'E005PWD'),
+	('M001', 'Baiju', 'IT', 'HOD', 7012345680, 'baiju@testco.com', '548, ABC Lane, Hyderabad', '1983-11-28', 'Male', 8943321100, '2016-08-25', 'M010', 'M001PWD');
 SELECT * FROM employee;
 
 CREATE TABLE Department(
@@ -90,17 +91,21 @@ INSERT INTO payroll VALUES ('E001', 'June 2024', 55000, 1500),
                            ('M001', 'July 2024', 80000, 2500);
 SELECT * FROM payroll;
 
+DROP TABLE performance;
 CREATE TABLE Performance (
 		Financial_Year VARCHAR(20),
 		Emp_ID VARCHAR(50),
 		Number_Of_Projects INT,
 		Score INT
 );
-INSERT INTO performance VALUES ('2020-21', 'E001', 4, 6),
-							   ('2018-19', 'E002', 7, 8),
-                               ('2022-23', 'E001', 8, 9),
-                               ('2023-24', 'M001', 14, 8),
-                               ('2020-21', 'E002', 2, 3);
+INSERT INTO performance VALUES ('2022-2023', 'E001', 4, 6),
+							   ('2022-2023', 'E002', 7, 8),
+                               ('2022-2023', 'E003', 2, 3),
+                               ('2022-2023', 'E004', 8, 9),
+                               ('2023-2024', 'E001', 2, 4),
+							   ('2023-2024', 'E002', 14, 9),
+                               ('2023-2024', 'E003', 6, 5),
+                               ('2023-2024', 'E004', 12, 8);
 SELECT * FROM performance;
 
 CREATE TABLE Projects (
@@ -111,12 +116,18 @@ CREATE TABLE Projects (
 		Dept_ID VARCHAR(50),
 		Manager_ID VARCHAR(50)
 );
-INSERT INTO projects VALUES ('PJ001', 'XML Integration', '2020-05-28', '2020-08-18', 'IT', 'M001'),
-							('PJ002', 'Database Migration', '2021-01-15', '2021-06-10', 'IT', 'M002'),
-							('PJ003', 'Accounts Transfer', '2022-03-22', '2022-09-05', 'ACC', 'M003'),
-							('PJ004', 'Network Security', '2023-07-01', '2023-12-15', 'IT', 'M004'),
-							('PJ005', 'Booking Transition', '2024-02-10', '2024-07-20', 'OPS', 'M005'),
-                            ('PJ008', 'Cloud Integration', '2024-06-10', '2024-12-20', 'IT', 'M004');
+INSERT INTO projects VALUES ('PJ001', 'XML Integration', '2023-05-28', '2024-08-18', 'IT', 'E001'),
+							('PJ002', 'Database Migration', '2024-01-15', '2025-06-10', 'IT', 'E002'),
+							('PJ003', 'Accounts Transfer', '2022-03-22', '2023-09-05', 'ACC', 'E003'),
+							('PJ004', 'Network Security', '2023-07-01', '2024-12-15', 'IT', 'E004'),
+							('PJ005', 'Booking Transition', '2024-02-10', '2024-07-20', 'OPS', 'E005'),
+                            ('PJ006', 'Cloud Integration', '2024-06-10', '2024-12-20', 'IT', 'M001'),
+                            ('PJ007', 'XML Integration', '2023-05-28', '2024-08-18', 'IT', 'E001'),
+							('PJ008', 'Database Migration', '2022-01-15', '2024-06-10', 'IT', 'E002'),
+							('PJ009', 'Accounts Transfer', '2024-03-22', '2025-09-05', 'ACC', 'E002'),
+							('PJ010', 'Network Security', '2023-07-01', '2024-12-15', 'IT', 'E002'),
+							('PJ011', 'Booking Transition', '2024-02-10', '2024-07-20', 'OPS', 'E003'),
+                            ('PJ012', 'Cloud Integration', '2024-06-10', '2024-12-20', 'IT', 'M001');
 SELECT * FROM projects;
 
 CREATE TABLE Employee_Project(
@@ -125,12 +136,19 @@ CREATE TABLE Employee_Project(
 		Role_in_Project VARCHAR(255),
 		Hours_Spent INT
 );
-INSERT INTO employee_project VALUES ('E005', 'PJ002', 'Database Admin', 180),
-									('E002', 'PJ003', 'Project Manager', 68),
-                                    ('E003', 'PJ004', 'Network Admin', 340),
-                                    ('E001', 'PJ005', 'Operation Manager', 250),
-                                    ('E005', 'PJ001', 'Lead Developer', 125),
-                                    ('E001', 'PJ008', 'Cloud Specialt', 118);
+INSERT INTO employee_project VALUES ('E001', 'PJ001', 'Database Admin', 180),
+									('E002', 'PJ001', 'Project Manager', 68),
+                                    ('E002', 'PJ002', 'Project Manager', 68),
+                                    ('E003', 'PJ003', 'Network Admin', 340),
+                                    ('E004', 'PJ004', 'Operation Manager', 250),
+                                    ('E005', 'PJ005', 'Lead Developer', 125),
+                                    ('M001', 'PJ006', 'Cloud Specialt', 118),
+                                    ('E001', 'PJ007', 'Database Admin', 180),
+									('E002', 'PJ008', 'Project Manager', 68),
+                                    ('E003', 'PJ009', 'Network Admin', 340),
+                                    ('E004', 'PJ010', 'Operation Manager', 250),
+                                    ('E005', 'PJ011', 'Lead Developer', 125),
+                                    ('E002', 'PJ012', 'Cloud Specialt', 118);
 SELECT * FROM employee_project;
 
 SELECT E.Emp_ID, E.Emp_Name, P.Project_ID, P.Project_Name, P.Start_Date, P.End_Date, P.Dept_ID, P.Manager_ID, EP.Role_in_Project, EP.Hours_Spent FROM employee E JOIN employee_project EP ON E.emp_id = EP.emp_id JOIN projects P ON P.project_id = EP.project_id WHERE E.emp_id='E001';
