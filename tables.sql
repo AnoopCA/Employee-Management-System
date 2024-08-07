@@ -80,7 +80,7 @@ SELECT * FROM leaves;
 
 CREATE TABLE Payroll(
 		Emp_ID VARCHAR(50),
-		Month_Year VARCHAR(10),
+		Month_Year VARCHAR(50),
 		Salary INT,
 		Deductions INT
 );
