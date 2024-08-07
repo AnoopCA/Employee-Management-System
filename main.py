@@ -249,28 +249,63 @@ elif st.session_state['choice'] == "Department Head":
         if selected == "Update Role":
             Role_ID = st.text_input("Enter the Role ID to update the details:")
             if st.button("Fetch the Roles Data"):
-                if Role_ID != "":
-                    cursor.execute("SELECT * FROM roles where role_id=%s", (Role_ID,))
-                    role_update = cursor.fetchone()
-                    st.session_state['roles'] = role_update    
-                    if 'roles' in st.session_state:
-                        Role_Name = st.text_input("Role Name", value=st.session_state['roles'][1])
-                        Role_Desc = st.text_input("Role Description", value=st.session_state['roles'][2])
-                        st.write(st.session_state['roles'], "at 1")
-                        if st.button("Update the Data"):
-                            st.write(st.session_state['roles'], "at 2")
-                            cursor.execute("UPDATE role SET role_name=%s, role_desc=%s WHERE role_id=%s", (Role_Name,Role_Desc,Role_ID))
-                            mydb.commit()
-                            st.success("The role details updated successfully!")
-                            st.session_state.pop('roles', None)
-                    else:
-                        st.error("The given Role ID is not found!")
-                else:
-                    st.error("Please enter the Role ID!")
-    
-        #elif selected == "Change Department":
+                cursor.execute("SELECT * FROM roles where role_id=%s", (Role_ID,))
+                role_update = cursor.fetchone()
+                st.session_state['roles'] = role_update
+            if 'roles' in st.session_state and st.session_state['roles']!=None:
+                Role_Name = st.text_input("Role Name", value=st.session_state['roles'][1])
+                Role_Desc = st.text_input("Role Description", value=st.session_state['roles'][2])
+                if st.button("Update the Data"):
+                    cursor.execute("UPDATE roles SET role_name=%s, role_desc=%s WHERE role_id=%s", (Role_Name,Role_Desc,Role_ID))
+                    mydb.commit()
+                    st.success("The role details updated successfully!")
+                    st.session_state.pop('roles', None)
+            else:
+                st.error("The given Role ID is not found!")
 
+        elif selected == "Change Department":
+            Emp_ID = st.text_input("Enter the Employee ID to change the Department")
+            if st.button("Fetch the details"):
+                cursor.execute("SELECT dept_id FROM employee WHERE emp_id=%s", (Emp_ID,))
+                Dept_ID = cursor.fetchone()[0]
+                if Dept_ID:
+                    st.session_state['Emp_ID'] = Emp_ID
+                    st.session_state['Dept_ID'] = Dept_ID
+            if 'Dept_ID' in st.session_state and st.session_state['Dept_ID']!=None:
+                st.text_input("Employee ID:", value=st.session_state['Emp_ID'])
+                Dept_ID = st.text_input("Department ID:", value=st.session_state['Dept_ID'])
+                if st.button("Update Details"):
+                    cursor.execute("UPDATE employee SET dept_id=%s WHERE emp_id=%s", (Dept_ID, st.session_state['Emp_ID']))
+                    mydb.commit()
+                    st.success("Department has been updated for the employee!")
+                    st.session_state.pop('Emp_ID', None)
+                    st.session_state.pop('Dept_ID', None)
+            else:
+                if Emp_ID!="":
+                    st.error("The given Employee ID is not found!")
 
+        elif selected == "Update Manager":
+            Emp_ID = st.text_input("Enter the Employee ID to change the Manager")
+            if st.button("Fetch the details"):
+                cursor.execute("SELECT manager_id FROM employee WHERE emp_id=%s", (Emp_ID,))
+                Manager_ID = cursor.fetchone()[0]
+                if Manager_ID:
+                    st.session_state['Emp_ID'] = Emp_ID
+                    st.session_state['Manager_ID'] = Manager_ID
+            if 'Manager_ID' in st.session_state and st.session_state['Manager_ID']!=None:
+                st.text_input("Employee ID:", value=st.session_state['Emp_ID'])
+                Manager_ID = st.text_input("Manager ID:", value=st.session_state['Manager_ID'])
+                if st.button("Update Details"):
+                    cursor.execute("UPDATE employee SET manager_id=%s WHERE emp_id=%s", (Manager_ID, st.session_state['Emp_ID']))
+                    mydb.commit()
+                    st.success("Manager has been updated for the employee!")
+                    st.session_state.pop('Emp_ID', None)
+                    st.session_state.pop('Manager_ID', None)
+            else:
+                if Emp_ID!="":
+                    st.error("The given Employee ID is not found!")
+
+                    
 elif st.session_state['choice'] == "Manager":
     if login_screen():
         with st.sidebar:
