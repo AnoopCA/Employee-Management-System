@@ -71,11 +71,11 @@ CREATE TABLE Leaves(
 		Approval_Status VARCHAR(20),
         Reason_For_leave VARCHAR(255)
 );
-INSERT INTO leaves VALUES ('2024-07-18', '2024-07-19', 'E001', 'M001', 'Approved', 'headache'),
-						  ('2024-07-15', '2024-07-18', 'E002', 'M002', 'Rejected', 'personal function'),
-                          ('2024-07-13', '2024-07-14', 'E003', 'M003', 'Approved', 'marriage'),
-                          ('2024-07-28', '2024-07-30', 'E004', 'M001', 'Approved', 'funeral'),
-                          ('2024-07-30', '2024-08-10', 'E005', 'M002', 'Approved', 'vacation');
+INSERT INTO leaves VALUES ('2024-08-18', '2024-08-19', 'E001', 'M001', 'Approved', 'headache'),
+						  ('2024-08-15', '2024-08-18', 'E002', 'M001', 'Rejected', 'personal function'),
+                          ('2024-08-13', '2024-08-14', 'E003', 'M001', 'Pending for Approval', 'marriage'),
+                          ('2024-08-28', '2024-08-30', 'E004', 'M001', 'Approved', 'funeral'),
+                          ('2024-08-30', '2024-08-10', 'E005', 'M001', 'Pending for Approval', 'vacation');
 SELECT * FROM leaves;
 
 CREATE TABLE Payroll(
@@ -91,7 +91,6 @@ INSERT INTO payroll VALUES ('E001', 'June 2024', 55000, 1500),
                            ('M001', 'July 2024', 80000, 2500);
 SELECT * FROM payroll;
 
-DROP TABLE performance;
 CREATE TABLE Performance (
 		Financial_Year VARCHAR(20),
 		Emp_ID VARCHAR(50),

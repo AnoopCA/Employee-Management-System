@@ -74,7 +74,7 @@ if st.session_state['choice'] == "Employee":
             cursor.execute("SELECT manager_id FROM employee WHERE emp_id=%s", (st.session_state['uid'],))
             manager_id = cursor.fetchall()[0][0]
             if st.button("Apply Leave"):
-                cursor.execute("INSERT INTO leaves VALUES (%s,%s,%s,%s,%s,%s)",(leave_start_date, leave_end_date, st.session_state['uid'], manager_id, "Pending for approval", leave_reason))
+                cursor.execute("INSERT INTO leaves VALUES (%s,%s,%s,%s,%s,%s)",(leave_start_date, leave_end_date, st.session_state['uid'], manager_id, "Pending for Approval", leave_reason))
                 popup("Leave Applied Successfully!")
             mydb.commit()
 
@@ -247,11 +247,14 @@ elif st.session_state['choice'] == "Department Head":
             selected = option_menu("Department Head", ["Update Role", "Change Department", "Update Manager", "Add Roles"], menu_icon="cast")
         
         if selected == "Update Role":
+            if 'roles' in st.session_state:
+                st.session_state.pop('roles', None)
             Role_ID = st.text_input("Enter the Role ID to update the details:")
             if st.button("Fetch the Roles Data"):
                 cursor.execute("SELECT * FROM roles where role_id=%s", (Role_ID,))
                 role_update = cursor.fetchone()
-                st.session_state['roles'] = role_update
+                if role_update:
+                    st.session_state['roles'] = role_update
             if 'roles' in st.session_state and st.session_state['roles']!=None:
                 Role_Name = st.text_input("Role Name", value=st.session_state['roles'][1])
                 Role_Desc = st.text_input("Role Description", value=st.session_state['roles'][2])
@@ -261,7 +264,8 @@ elif st.session_state['choice'] == "Department Head":
                     st.success("The role details updated successfully!")
                     st.session_state.pop('roles', None)
             else:
-                st.error("The given Role ID is not found!")
+                if Role_ID != "":
+                    st.error("The given Role ID is not found!")
 
         elif selected == "Change Department":
             Emp_ID = st.text_input("Enter the Employee ID to change the Department")
@@ -288,8 +292,9 @@ elif st.session_state['choice'] == "Department Head":
             Emp_ID = st.text_input("Enter the Employee ID to change the Manager")
             if st.button("Fetch the details"):
                 cursor.execute("SELECT manager_id FROM employee WHERE emp_id=%s", (Emp_ID,))
-                Manager_ID = cursor.fetchone()[0]
+                Manager_ID = cursor.fetchone()
                 if Manager_ID:
+                    Manager_ID = Manager_ID[0]
                     st.session_state['Emp_ID'] = Emp_ID
                     st.session_state['Manager_ID'] = Manager_ID
             if 'Manager_ID' in st.session_state and st.session_state['Manager_ID']!=None:
@@ -305,17 +310,69 @@ elif st.session_state['choice'] == "Department Head":
                 if Emp_ID!="":
                     st.error("The given Employee ID is not found!")
 
+        elif selected == "Add Roles":
+            st.markdown("##### Create New Role")
+            Role_ID = st.text_input("Role ID")
+            Role_Name = st.text_input("Role Name")
+            Role_Desc = st.text_input("Description")
+            if st.button("Create The Role"):
+                if not Role_ID or not Role_Name or not Role_Desc:
+                    st.error("Fill up all the details to proceed!")
+                else:
+                    cursor.execute("INSERT INTO roles VALUES (%s,%s,%s)", (Role_ID,Role_Name,Role_Desc))
+                    mydb.commit()
+                    st.success("New role created successfully!")
                     
 elif st.session_state['choice'] == "Manager":
     if login_screen():
         with st.sidebar:
-            selected = option_menu("Manager", ["View leaves", "View approval request"], menu_icon="cast")
-        st.write(selected)
+            selected = option_menu("Manager", ["Leave Approval", "Update Employee Project"], menu_icon="cast")
+        if selected == "Leave Approval":
+            st.markdown("##### Leaves in the team for the Current Month")
+            leaves_df = pd.read_sql(f"""SELECT * FROM leaves WHERE approver_id='{st.session_state['uid']}' AND 
+                                    MONTH(leave_start_date)='{datetime.now().month}' OR MONTH(leave_end_date)='{datetime.now().month}'""", mydb)
+            cursor.execute("SELECT * FROM leaves WHERE approver_id=%s AND MONTH(leave_start_date)=%s OR MONTH(leave_end_date)=%s", 
+                            (st.session_state['uid'], datetime.now().month, datetime.now().month))
+            leaves = cursor.fetchall()
+            if leaves:
+                st.dataframe(leaves_df)
+                st.write("")
+                st.markdown("##### Approve / Reject Leaves:")
+                st.session_state['Emp_ID_leave'] = st.text_input("Enter Employee ID to fetch the details")
+                if st.button("Fetch Details"):
+                    for i in leaves:
+                        if 'Emp_ID_leaves' in st.session_state and 'leave_details' in st.session_state:
+                            if i[2] == st.session_state['Emp_ID_leave'] and st.session_state['leave_details'][4]=="Pending for Approval":
+                                st.session_state['leave_details'] = i
+                                st.session_state['leave_status'] = "Rejected"
+                if 'leave_details' in st.session_state:
+                    leave_details = st.session_state['leave_details']
+                    st.text_input("Leave Start Date", value=leave_details[0], disabled=True)
+                    st.text_input("Leave End Date", value=leave_details[1], disabled=True)
+                    st.text_input("Leave Reason", value=leave_details[5], disabled=True)
+                    approve = st.toggle("Approve", value=st.session_state['leave_status'] == "Approved")
+                    if approve:
+                        st.session_state['leave_status'] = "Approved"
+                    else:
+                        st.session_state['leave_status'] = "Rejected"
+                    st.text_input("Leave Status", value=st.session_state['leave_status'], disabled=True)
+                    if st.button("Update Leave Details"):
+                        cursor.execute("UPDATE leaves SET approval_status=%s WHERE emp_id=%s AND leave_start_date=%s AND leave_end_date=%s",
+                                       (st.session_state['leave_status'],st.session_state['Emp_ID_leave'],leave_details[0],leave_details[1]))
+                        mydb.commit()
+                        st.success("Leave details updated successfully!")
+
+                        # *** Leaves not saving, not going to that part of the code *** #
+                else:
+                    if not st.session_state['Emp_ID_leave']=="":
+                        popup("There are no Pending approval for the given Employee ID!")
+
 elif st.session_state['choice'] == "Project Manager":
     if login_screen():
         with st.sidebar:
-            selected = option_menu("Project Manager", ["Add project", "Update project details", "Add/update employee project"], menu_icon="cast")
-        st.write(selected)
+            selected = option_menu("Project Manager", ["Add Projects", "Update Projects"], menu_icon="cast")
+        
+        
 
 st.session_state['popup'] = False
 with st.sidebar:
