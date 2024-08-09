@@ -74,9 +74,11 @@ CREATE TABLE Leaves(
 INSERT INTO leaves VALUES ('2024-08-18', '2024-08-19', 'E001', 'M001', 'Approved', 'headache'),
 						  ('2024-08-15', '2024-08-18', 'E002', 'M001', 'Rejected', 'personal function'),
                           ('2024-08-13', '2024-08-14', 'E003', 'M001', 'Pending for Approval', 'marriage'),
-                          ('2024-08-28', '2024-08-30', 'E004', 'M001', 'Approved', 'funeral'),
+                          ('2024-08-28', '2024-08-30', 'E004', 'M001', 'Pending for Approval', 'funeral'),
                           ('2024-08-30', '2024-08-10', 'E005', 'M001', 'Pending for Approval', 'vacation');
 SELECT * FROM leaves;
+
+SELECT * FROM leaves WHERE (approver_id='M001' AND Approval_Status='Pending for Approval' AND (MONTH(leave_start_date)=8 OR MONTH(leave_end_date)=8));
 
 CREATE TABLE Payroll(
 		Emp_ID VARCHAR(50),
