@@ -78,8 +78,6 @@ INSERT INTO leaves VALUES ('2024-08-18', '2024-08-19', 'E001', 'M001', 'Approved
                           ('2024-08-30', '2024-08-10', 'E005', 'M001', 'Pending for Approval', 'vacation');
 SELECT * FROM leaves;
 
-SELECT * FROM leaves WHERE (approver_id='M001' AND Approval_Status='Pending for Approval' AND (MONTH(leave_start_date)=8 OR MONTH(leave_end_date)=8));
-
 CREATE TABLE Payroll(
 		Emp_ID VARCHAR(50),
 		Month_Year VARCHAR(50),
@@ -151,5 +149,3 @@ INSERT INTO employee_project VALUES ('E001', 'PJ001', 'Database Admin', 180),
                                     ('E005', 'PJ011', 'Lead Developer', 125),
                                     ('E002', 'PJ012', 'Cloud Specialt', 118);
 SELECT * FROM employee_project;
-
-SELECT E.Emp_ID, E.Emp_Name, P.Project_ID, P.Project_Name, P.Start_Date, P.End_Date, P.Dept_ID, P.Manager_ID, EP.Role_in_Project, EP.Hours_Spent FROM employee E JOIN employee_project EP ON E.emp_id = EP.emp_id JOIN projects P ON P.project_id = EP.project_id WHERE E.emp_id='E001';
