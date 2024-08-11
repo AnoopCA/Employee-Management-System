@@ -37,3 +37,12 @@ This Employee Management System (EMS) is designed to manage employee data effici
 - **Update Project Details**: Modify the details of existing projects.
 - **View Projects**: Display all projects.
 - **Add or Update Employee Project**: Assign or update employees in projects.
+
+
+## Files
+
+- **main.py**: Contains the Streamlit application code along with SQL queries.
+- **tables.sql**: Defines the database schema and table structures.
+- **technical_specification_document.docx**: Detailed project explanation, including application screenshots, database schema, and Streamlit code.
+- **readme.md**: Provides a brief description of the project's features and files.
+
