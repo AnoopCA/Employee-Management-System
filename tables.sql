@@ -18,12 +18,15 @@ CREATE TABLE Employee(
         primary key(Emp_ID)
 );
 INSERT INTO employee VALUES 
-	('E001', 'Anitha', 'HR', 'HRANL', 9123456789, 'anitha@testco.com', '123, ABC Street, Cochin', '1985-07-15', 'Female', 9876543210, '2010-02-15', 'M001', 'E001PWD'),
-	('E002', 'Ravi', 'IT', 'DEV', 7890123456, 'ravi@testco.com', '456, XYZ Avenue, Bangalore', '1990-11-20', 'Male', 8765432109, '2012-06-30', 'M002', 'E002PWD'),
-	('E003', 'Lakshmi', 'FIN', 'ACCT', 7012345678, 'lakshmi@testco.com', '789, DEF Road, Chennai', '1992-01-10', 'Female', 7654321098, '2018-04-10', 'M003', 'E003PWD'),
-    ('E004', 'Rajesh', 'HR', 'HRANL', 7012345679, 'rajesh@testco.com', '123, ABC Street, Bangalore', '1990-05-15', 'Male', 7654321099, '2017-06-12', 'M001', 'E004PWD'),
-	('E005', 'Sunita', 'IT', 'PM', 7012345680, 'sunita@testco.com', '456, XYZ Lane, Hyderabad', '1985-11-20', 'Female', 7654321100, '2019-08-25', 'M002', 'E005PWD'),
-	('M001', 'Baiju', 'IT', 'HOD', 7012345680, 'baiju@testco.com', '548, ABC Lane, Hyderabad', '1983-11-28', 'Male', 8943321100, '2016-08-25', 'M010', 'M001PWD');
+	('E001', 'Anitha', 'HR', 'HRANL', 9123456789, 'anitha@testco.com', '123, ABC Street, Cochin', '1985-07-15', 'Female', 9876543210, '2010-02-15', 'M001', 'E001'),
+	('E002', 'Ravi', 'IT', 'DEV', 7890123456, 'ravi@testco.com', '456, XYZ Avenue, Bangalore', '1990-11-20', 'Male', 8765432109, '2012-06-30', 'M002', 'E002'),
+	('E003', 'Lakshmi', 'FIN', 'ACCT', 7012345678, 'lakshmi@testco.com', '789, DEF Road, Chennai', '1992-01-10', 'Female', 7654321098, '2018-04-10', 'M003', 'E003'),
+    ('E004', 'Rajesh', 'HR', 'HRANL', 7012345679, 'rajesh@testco.com', '123, ABC Street, Bangalore', '1990-05-15', 'Male', 7654321099, '2017-06-12', 'M001', 'E004'),
+	('E005', 'Sunita', 'IT', 'PM', 7012345680, 'sunita@testco.com', '456, XYZ Lane, Hyderabad', '1985-11-20', 'Female', 7654321100, '2019-08-25', 'M002', 'E005'),
+	('M001', 'Baiju', 'IT', 'MGR', 7012345680, 'baiju@testco.com', '567, TXM Lane, Telengana', '1985-2-28', 'Male', 8943321100, '2016-08-25', 'M010', 'M001'),
+    ('M002', 'Ravi', 'FIN', 'MGR', 8934533253, 'ravi@testco.com', '4567, NY Lane, New York', '1988-6-17', 'Male', 8943334500, '2046-08-25', 'M011', 'M002'),
+    ('M003', 'Uthaman', 'OPS', 'HOD', 7983445354, 'uthaman@testco.com', '234, ABC Lane, Kerala', '1996-4-16', 'Male', 8943345100, '2020-08-25', 'M012', 'M003'),
+    ('M004', 'Swati', 'LOG', 'HOD', 7898723435, 'swati@testco.com', 'ABC Trrn, Haryana', '1991-6-15', 'Female', 8943324570, '2012-08-25', 'M015', 'M004');
 SELECT * FROM employee;
 
 CREATE TABLE Department(
